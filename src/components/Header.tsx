@@ -88,7 +88,7 @@ const Header: React.FC = () => {
                   fontStyle: 'italic'
                 }}
               >
-                Upload a Discus fish image to identify its variety
+                Neural Networks and Deep Learning Final Assessment by Group - 02
               </Typography>
             </motion.div>
           </Toolbar>

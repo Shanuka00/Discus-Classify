@@ -6,17 +6,31 @@ import ImageUpload from '../components/ImageUpload';
 import PredictionResult from '../components/PredictionResult';
 import Footer from '../components/Footer';
 import { DiscusFish } from '../types';
+import { ImageService } from '../services/imageService';
 
 const Home: React.FC = () => {
   const [prediction, setPrediction] = useState<DiscusFish | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [shouldResetImage, setShouldResetImage] = useState<boolean>(false);
 
   const handlePredictionResult = (result: DiscusFish) => {
     setPrediction(result);
   };
 
-  const handleReset = () => {
+  const handleReset = async () => {
+    // Clean up selectedimg folder
+    const cleanupResult = await ImageService.cleanup();
+    if (!cleanupResult.success) {
+      console.error('Failed to cleanup files:', cleanupResult.error);
+    } else {
+      console.log('Files cleaned up from reset');
+    }
+    
     setPrediction(null);
+    // Trigger image reset
+    setShouldResetImage(true);
+    // Reset the flag after a brief moment
+    setTimeout(() => setShouldResetImage(false), 100);
   };
 
   return (
@@ -69,6 +83,7 @@ const Home: React.FC = () => {
               onReset={handleReset}
               isLoading={isLoading}
               setIsLoading={setIsLoading}
+              shouldReset={shouldResetImage}
             />
             
             <PredictionResult 

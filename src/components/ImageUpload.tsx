@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useState, useEffect } from 'react';
 import { 
   Box, 
   Typography, 
@@ -14,40 +14,35 @@ import { UploadCloud, X, RefreshCw } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { DiscusFish } from '../types';
 import { getPrediction } from '../data/mockData';
+import { ImageService } from '../services/imageService';
 
 interface ImageUploadProps {
   onPredictionResult: (prediction: DiscusFish) => void;
   onReset: () => void;
   isLoading: boolean;
   setIsLoading: (loading: boolean) => void;
+  shouldReset?: boolean; // Add a prop to trigger reset from parent
 }
 
 const ImageUpload: React.FC<ImageUploadProps> = ({ 
   onPredictionResult, 
   onReset,
   isLoading,
-  setIsLoading
+  setIsLoading,
+  shouldReset
 }) => {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
-  const onDrop = useCallback((acceptedFiles: File[]) => {
-    if (acceptedFiles.length > 0) {
-      const file = acceptedFiles[0];
-      const reader = new FileReader();
-      
-      reader.onload = () => {
-        setImagePreview(reader.result as string);
-        // Simulate prediction process
-        handlePrediction();
-      };
-      
-      reader.readAsDataURL(file);
+  // Reset image preview when shouldReset changes
+  useEffect(() => {
+    if (shouldReset) {
+      setImagePreview(null);
     }
-  }, []);
+  }, [shouldReset]);
 
-  const handlePrediction = async () => {
+  const handlePrediction = useCallback(async () => {
     setIsLoading(true);
     try {
       // Simulate API call delay with our mock data
@@ -58,9 +53,41 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [setIsLoading, onPredictionResult]);
 
-  const removeImage = () => {
+  const onDrop = useCallback(async (acceptedFiles: File[]) => {
+    if (acceptedFiles.length > 0) {
+      const file = acceptedFiles[0];
+      
+      // Save image to selectedimg folder
+      const uploadResult = await ImageService.uploadImage(file);
+      if (!uploadResult.success) {
+        console.error('Failed to save image:', uploadResult.error);
+      } else {
+        console.log('Image saved to selectedimg folder:', uploadResult.filename);
+      }
+      
+      const reader = new FileReader();
+      
+      reader.onload = () => {
+        setImagePreview(reader.result as string);
+        // Simulate prediction process
+        handlePrediction();
+      };
+      
+      reader.readAsDataURL(file);
+    }
+  }, [handlePrediction]);
+
+  const removeImage = async () => {
+    // Clean up selectedimg folder
+    const cleanupResult = await ImageService.cleanup();
+    if (!cleanupResult.success) {
+      console.error('Failed to cleanup files:', cleanupResult.error);
+    } else {
+      console.log('Files cleaned up successfully');
+    }
+    
     setImagePreview(null);
     onReset();
   };
