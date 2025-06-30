@@ -2,13 +2,16 @@
 
 // Image service for handling local file uploads and cleanup
 
+import { DiscusFish } from '../types';
+import { createDiscusFishFromPrediction } from '../data/mockData';
+
 const IMAGE_SERVICE_URL = "http://localhost:8000";
 
 export class ImageService {
-  // Upload image to selectedimg folder
+  // Upload image and get prediction
   static async uploadImage(
     file: File,
-  ): Promise<{ success: boolean; filename?: string; error?: string }> {
+  ): Promise<{ success: boolean; prediction?: DiscusFish; filename?: string; error?: string }> {
     try {
       const formData = new FormData();
       formData.append("file", file);
@@ -19,7 +22,25 @@ export class ImageService {
       });
 
       const result = await response.json();
-      return result;
+      console.log("Upload result", result);
+
+      if (result.predicted_class && result.confidence) {
+        // Create complete DiscusFish object with description
+        const prediction = createDiscusFishFromPrediction(
+          result.predicted_class,
+          result.confidence
+        );
+        
+        return { 
+          success: true, 
+          prediction,
+          filename: file.name 
+        };
+      } else if (result.error) {
+        return { success: false, error: result.error };
+      } else {
+        return { success: false, error: "Invalid response from server" };
+      }
     } catch (error) {
       console.error("Upload error:", error);
       return { success: false, error: "Failed to upload image" };

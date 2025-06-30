@@ -1,6 +1,6 @@
-python3 -m venv venv
+py -m venv venv
 
-source venv/bin/activate
+venv\Scripts\activate
 
 pip install fastapi uvicorn python-multipart pillow torch torchvision
 
