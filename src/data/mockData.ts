@@ -20,17 +20,17 @@ export const discusFishVarieties: DiscusFish[] = [
     description: "Wild Discus are unselectively bred fish from any of the three recognized species. While lacking the solid colors of newer breeds, they showcase natural beauty with round body shapes and authentic wild coloration patterns."
   },
   {
-    predicted_class: "Blue Diamond",
+    predicted_class: "Blue_Diamond",
     confidence: "87.2%",
     description: "Blue Diamond Discus is an attractive metallic blue breed developed in Asia in the early 1990s. Features a solid blue base without vertical bars, deep red eyes, and an oval shape that's often hardier than wild-caught specimens."
   },
   {
-    predicted_class: "Red Turquoise",
+    predicted_class: "Red_Turquoise",
     confidence: "91.5%",
     description: "Red Turquoise Discus combines striking turquoise and red colors, first developed in Asia in the 1980s. Features metallic turquoise background with deep red markings extending onto fins, available in blue base or red base variations."
   },
   {
-    predicted_class: "Brilliant Turquoise",
+    predicted_class: "Brilliant_Turquoise",
     confidence: "88.3%",
     description: "Brilliant Turquoise Discus combines bright turquoise and green shades with dark red eyes. Features fine reddish markings and possible darker vertical stripes, making it one of the most colorful breeds perfect for dramatic display tanks."
   },
@@ -60,7 +60,7 @@ export const discusFishVarieties: DiscusFish[] = [
     description: "Marlboro Discus is truly eye-catching with bright red body color and light yellow or white head with red eyes. Features darker caudal, anal, and dorsal fins, sometimes nearly black, with possible pale patches at tail base."
   },
   {
-    predicted_class: "Ring Leopard",
+    predicted_class: "Ring_Leopard",
     confidence: "94.2%",
     description: "Ring Leopard Discus features unique ring-shaped markings resembling leopard or jaguar patterns. Available in several color combinations including red, blue, yellow, and white, with possible faint vertical stripes on body sides."
   },
@@ -75,12 +75,12 @@ export const discusFishVarieties: DiscusFish[] = [
     description: "Panda Discus features heavily patterned body with markings that fuse into large orange clusters surrounded by turquoise spots. The face tends to be yellowish, with similar coloring possibly occurring at the tail base."
   },
   {
-    predicted_class: "Pigeon Blood",
+    predicted_class: "Pigeon_Blood",
     confidence: "88.8%",
     description: "Pigeon Blood Discus is a hardy man-made strain with cream yellow background and yellow-red patterning. Features fine black speckling, bright red eyes, and many specimens display distinctive black tails for unique contrast."
   },
   {
-    predicted_class: "Albino Golden",
+    predicted_class: "Albino_Golden",
     confidence: "90.7%",
     description: "Albino Golden Discus is one of the brightest breeds with solid yellow coloration like golden sunrise light. The color may extend onto fins or be replaced with white or red markings, featuring contrasting red eyes."
   },
@@ -90,31 +90,47 @@ export const discusFishVarieties: DiscusFish[] = [
     description: "Brown Discus is a natural wild-type species also known as blue discus, found in the Amazon River basin. While lacking bright man-made colors, these fish display stunning natural brown coloration with dark bars and turquoise accents."
   },
   {
-    predicted_class: "Tiger Turkish",
+    predicted_class: "Tiger_Turkish",
     confidence: "92.1%",
     description: "Tiger Turkish Discus is named for its colorful vertical stripes with brilliant turquoise background and red stripes on sides. Natural dark vertical bars add to the stripey appearance, creating a stunning tiger-like pattern."
   },
   {
-    predicted_class: "Red Spotted Green",
+    predicted_class: "Red_Spotted_Green",
     confidence: "89.4%",
     description: "Red Spotted Green Discus offers enhanced wild-type appearance with golden sunset body color and small red spots. Features clearly visible dark vertical bars with turquoise and red coloring around head, shoulders, and vent areas."
   },
   {
-    predicted_class: "White Butterfly",
+    predicted_class: "White_Butterfly",
     confidence: "86.2%",
     description: "White Butterfly Discus stands out with gleaming solid white body color like an aquarium angel. Typically features red eyes and yellow facial markings, with some specimens displaying spots or stripes over their pure white bodies."
   },
   {
-    predicted_class: "Millennium Golden",
+    predicted_class: "Millennium_Golden",
     confidence: "93.9%",
     description: "Millennium Golden Discus is one of the purest solid-colored breeds in the hobby. Features stunning golden coloration that may extend to dorsal and anal fins, or contrast with white and transparent finnage for elegant appearance."
   },
   {
-    predicted_class: "Red Melon",
+    predicted_class: "Red_Melon",
     confidence: "88.6%",
     description: "Red Melon Discus is similar to Red Marlboro with bright red-orange body and paler yellow or white facial coloring. This breed showcases warm contrasting colors and represents significant genetic evolution from natural wild types."
   }
 ];
+
+// Find description for a predicted class
+export const getDiscusDescription = (predictedClass: string): string => {
+  const allFish = [samplePrediction, ...discusFishVarieties];
+  const fish = allFish.find(f => f.predicted_class === predictedClass);
+  return fish?.description || "No description available for this Discus variety.";
+};
+
+// Create DiscusFish object from prediction result
+export const createDiscusFishFromPrediction = (predictedClass: string, confidence: string): DiscusFish => {
+  return {
+    predicted_class: predictedClass,
+    confidence: confidence,
+    description: getDiscusDescription(predictedClass)
+  };
+};
 
 // Simulates a delay and returns a random prediction from our sample data
 export const getPrediction = (): Promise<DiscusFish> => {

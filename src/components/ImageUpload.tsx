@@ -12,7 +12,7 @@ import {
   IconButton,
 } from "@mui/material";
 import { useDropzone } from "react-dropzone";
-import { UploadCloud, X, RefreshCw } from "lucide-react";
+import { UploadCloud, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { DiscusFish } from "../types";
 import { getPrediction } from "../data/mockData";
@@ -44,42 +44,51 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
     }
   }, [shouldReset]);
 
-  const handlePrediction = useCallback(async () => {
+  const handlePrediction = useCallback(async (file?: File) => {
+    if (!file && !imagePreview) {
+      console.error("No file provided for prediction");
+      return;
+    }
+
     setIsLoading(true);
     try {
-      // Simulate API call delay with our mock data
-      const result = await getPrediction();
-      onPredictionResult(result);
+      if (file) {
+        // Upload image and get real prediction from backend
+        const uploadResult = await ImageService.uploadImage(file);
+        console.log("Upload result", uploadResult);
+        
+        if (!uploadResult.success) {
+          console.error("Failed to get prediction:", uploadResult.error);
+          return;
+        }
+        
+        if (uploadResult.prediction) {
+          onPredictionResult(uploadResult.prediction);
+        }
+      } else {
+        // If no file provided, this is a retry request - use mock data for now
+        // In a real scenario, you might want to store the file reference for retry
+        const result = await getPrediction();
+        onPredictionResult(result);
+      }
     } catch (error) {
       console.error("Error getting prediction:", error);
     } finally {
       setIsLoading(false);
     }
-  }, [setIsLoading, onPredictionResult]);
+  }, [setIsLoading, onPredictionResult, imagePreview]);
 
   const onDrop = useCallback(
     async (acceptedFiles: File[]) => {
       if (acceptedFiles.length > 0) {
         const file = acceptedFiles[0];
 
-        // Save image to selectedimg folder
-        const uploadResult = await ImageService.uploadImage(file);
-        console.log("Upload result", uploadResult);
-        if (!uploadResult.success) {
-          console.error("Failed to save image:", uploadResult.error);
-        } else {
-          console.log(
-            "Image saved to selectedimg folder:",
-            uploadResult.filename,
-          );
-        }
-
         const reader = new FileReader();
 
         reader.onload = () => {
           setImagePreview(reader.result as string);
-          // Simulate prediction process
-          handlePrediction();
+          // Get real prediction from backend
+          handlePrediction(file);
         };
 
         reader.readAsDataURL(file);
@@ -228,14 +237,14 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
                   Image Preview
                 </Typography>
                 <Box>
-                  <IconButton
+                  {/* <IconButton
                     color="primary"
-                    onClick={handlePrediction}
+                    onClick={() => handlePrediction()}
                     disabled={isLoading}
                     sx={{ mr: 1 }}
                   >
                     <RefreshCw size={20} />
-                  </IconButton>
+                  </IconButton> */}
                   <IconButton
                     color="error"
                     onClick={removeImage}
