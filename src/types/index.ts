@@ -1,3 +1,5 @@
+/** @format */
+
 export interface DiscusFish {
   predicted_class: string;
   confidence: string;
